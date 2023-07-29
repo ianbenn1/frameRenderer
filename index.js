@@ -3,6 +3,7 @@ let MAZEY = 0;
 let ENDPOINTX = 0;
 let ENDPOINTY = 0;
 let STARTTIME = 0;
+let TOTAL_RENDER_TIME = 0;
 let mazecells = document.getElementsByClassName("maze-block");
 document.getElementById('build').onclick = function(){
     let x = document.getElementById('maze-height').value;
@@ -21,12 +22,16 @@ document.getElementById('build').onclick = function(){
 
 document.getElementById('solve').onclick = function() {
     var rendermode = document.getElementById("solvetype").value;
+    TOTAL_RENDER_TIME = 0;
     STARTTIME = Date.now();
     if(rendermode == 'single') {
         solver(MAZEX, MAZEY, 0, 0, false, "#999", 1);
     }
     else if(rendermode == 'sli') {
         solver2(MAZEX, MAZEY, 0, 0);
+    }
+    else if(rendermode == 'sliint') {
+        solver3(MAZEX, MAZEY, 0, 0)
     }
     
 };
@@ -67,7 +72,6 @@ async function mazeBuilder(x, y) {
                 cell.dataset.taken = "false";
             }
             row.appendChild(cell);
-           // await sleep(1);
         }
     }
 }
@@ -82,8 +86,11 @@ function solver (maze_size_x, maze_size_y, x, y, rev, colour, skip) {
     console.log(`rendvario: ${document.getElementById("vario").value} totalrand: ${rendervario}`)
     let renderTime = parseFloat(renderspd) + parseFloat(rendervario);
     console.log(`renderTime: ${renderTime}`);
+    TOTAL_RENDER_TIME += renderTime;
+    document.getElementById("renderTime").innerHTML = `GPU Time: ${TOTAL_RENDER_TIME}`;
+    document.getElementById("simTime").innerHTML = `Wall Time: ${Date.now() - STARTTIME}`;
 
-    if (document.getElementsByClassName(`cell${x}-${y}`)[0].dataset.taken == "true") {
+    if (document.getElementsByClassName(`cell${x}-${y}`) == undefined || document.getElementsByClassName(`cell${x}-${y}`)[0].dataset.taken == "true") {
         console.log('done2 1');
         console.log("millis: ", Date.now() - STARTTIME)
         done = true;
@@ -125,6 +132,11 @@ function solver2 (maze_size_x, maze_size_y, x, y) {
 
     setTimeout(() => solver(halfx, maze_size_y, x, y, false, '#999', 1), 1)
     setTimeout(() => solver(halfx-1, maze_size_y, maze_size_x-1, maze_size_y-1, true, "#ccc", 1), 1)
+}
+
+function solver3 (maze_size_x, maze_size_y, x, y) {
+    setTimeout(() => solver(maze_size_x, maze_size_y, x, y, false, '#999', 2), 1)
+    setTimeout(() => solver(maze_size_x, maze_size_y, x+1, y, false, "#ccc", 2), 1)
 }
 
 
